@@ -1,19 +1,19 @@
-package com.xmerca.transactionsservice.config;
+package com.xmerca.authservice.config;
 
-import com.xmerca.transactionsservice.config.exceptions.BadRequestException;
-import com.xmerca.transactionsservice.config.exceptions.NotFoundException;
-import com.xmerca.transactionsservice.config.exceptions.UnauthorizedException;
+import com.xmerca.authservice.config.exceptions.BadRequestException;
+import com.xmerca.authservice.config.exceptions.NotFoundException;
+import com.xmerca.authservice.config.exceptions.UnauthorizedException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
@@ -102,14 +102,6 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)
                 .body("Unauthorized: " + ex.getMessage());
-    }
-
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<String> handleAccessDeniedException(AccessDeniedException ex) {
-        log.error("Access denied: {}", ex.getMessage());
-        return ResponseEntity
-                .status(HttpStatus.FORBIDDEN)
-                .body("Access denied: " + ex.getMessage());
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
