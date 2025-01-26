@@ -8,7 +8,7 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 @Data
-public class CreateDepositDTO {
+public class CreateDepositDto {
     @NotNull(message = "Account ID cannot be null")
     private UUID accountId;
 

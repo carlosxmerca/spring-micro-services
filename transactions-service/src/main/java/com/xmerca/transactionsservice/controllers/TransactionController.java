@@ -1,9 +1,11 @@
 package com.xmerca.transactionsservice.controllers;
 
-import com.xmerca.transactionsservice.dtos.CreateDepositDTO;
-import com.xmerca.transactionsservice.dtos.CreateWithdrawDTO;
+import com.xmerca.transactionsservice.dtos.CreateDepositDto;
+import com.xmerca.transactionsservice.dtos.CreateTransactionDto;
+import com.xmerca.transactionsservice.dtos.CreateWithdrawDto;
 import com.xmerca.transactionsservice.models.Transaction;
 import com.xmerca.transactionsservice.services.TransactionService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,6 +13,7 @@ import javax.validation.Valid;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @RestController
 @RequestMapping("/transactions")
 public class TransactionController {
@@ -26,15 +29,23 @@ public class TransactionController {
         return ResponseEntity.ok(transactions);
     }
 
+    @PostMapping
+    public ResponseEntity<Transaction> transactionBetweenAccounts(@Valid @RequestBody CreateTransactionDto dto) {
+        Transaction transaction = transactionService.transactionBetweenAccounts(dto);
+        return ResponseEntity.ok(transaction);
+    }
+
     @PostMapping("/deposit")
-    public ResponseEntity<Transaction> depositToAccount(@Valid @RequestBody CreateDepositDTO dto) {
+    public ResponseEntity<Transaction> depositToAccount(@Valid @RequestBody CreateDepositDto dto) {
+        log.info("Start deposit to account {}", dto.getAccountId());
         Transaction transaction = transactionService.depositToAccount(dto);
         return ResponseEntity.ok(transaction);
     }
 
     @PostMapping("/withdraw")
-    public ResponseEntity<Transaction> withdrawFromAccount(@Valid @RequestBody CreateWithdrawDTO dto) {
+    public ResponseEntity<Transaction> withdrawFromAccount(@Valid @RequestBody CreateWithdrawDto dto) {
         Transaction transaction = transactionService.withdrawFromAccount(dto);
         return ResponseEntity.ok(transaction);
     }
+
 }
