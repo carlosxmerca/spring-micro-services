@@ -113,7 +113,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     private BankAccountDto getBankAccount(UUID accountId) {
         BankAccountDto accountDto = webClientBuilder.build().get()
-                .uri("http://localhost:8081/bank-accounts/" + accountId)
+                .uri("http://bank-accounts-service/bank-accounts/" + accountId)
                 .retrieve()
                 .onStatus(HttpStatus::is4xxClientError, response -> {
                     log.error("Client error while fetching account: {}", response.statusCode());
@@ -138,7 +138,7 @@ public class TransactionServiceImpl implements TransactionService {
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("amount", amount);
 
-        String uri = "http://localhost:8081/bank-accounts/" + operation.getOperation() + "/" + accountId;
+        String uri = "http://bank-accounts-service/bank-accounts/" + operation.getOperation() + "/" + accountId;
 
         webClientBuilder.build().patch()
                 .uri(uri)
@@ -170,7 +170,7 @@ public class TransactionServiceImpl implements TransactionService {
         requestBody.put("originAccountId", dto.getOriginAccountId());
         requestBody.put("destinationAccountId", dto.getDestinationAccountId());
 
-        String uri = "http://localhost:8081/bank-accounts/transaction/";
+        String uri = "http://bank-accounts-service/bank-accounts/transaction/";
 
         webClientBuilder.build().patch()
                 .uri(uri)
