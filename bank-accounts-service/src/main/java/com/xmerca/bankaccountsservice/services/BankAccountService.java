@@ -1,6 +1,7 @@
 package com.xmerca.bankaccountsservice.services;
 
 import com.xmerca.bankaccountsservice.dtos.CreateBankAccountDTO;
+import com.xmerca.bankaccountsservice.dtos.TransactionBetweenAccountsDto;
 import com.xmerca.bankaccountsservice.dtos.TransactionDto;
 import com.xmerca.bankaccountsservice.models.BankAccount;
 
@@ -18,4 +19,6 @@ public interface BankAccountService {
     void debitToBankAccount(UUID id, TransactionDto dto);
 
     void creditToBankAccount(UUID id, TransactionDto dto);
+
+    void transactionBetweenAccounts(TransactionBetweenAccountsDto  dto);
 }

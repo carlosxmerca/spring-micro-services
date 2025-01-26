@@ -3,6 +3,7 @@ package com.xmerca.bankaccountsservice.services.implementation;
 import com.xmerca.bankaccountsservice.config.exceptions.BadRequestException;
 import com.xmerca.bankaccountsservice.config.exceptions.NotFoundException;
 import com.xmerca.bankaccountsservice.dtos.CreateBankAccountDTO;
+import com.xmerca.bankaccountsservice.dtos.TransactionBetweenAccountsDto;
 import com.xmerca.bankaccountsservice.dtos.TransactionDto;
 import com.xmerca.bankaccountsservice.mappers.BankAccountMapper;
 import com.xmerca.bankaccountsservice.models.AccountType;
@@ -66,12 +67,10 @@ public class BankAccountServiceImpl implements BankAccountService {
         log.info("Debiting {} from bank account ID: {}", transactionDto.getAmount(), id);
         BankAccount bankAccount = bankAccountRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Bank account not found"));
+
         BigDecimal amount = transactionDto.getAmount();
-        if (bankAccount.getCurrentBalance().compareTo(amount) < 0) {
-            log.error("Insufficient balance in account ID: {}. Current balance: {}, Debit amount: {}",
-                    bankAccount.getAccountId(), bankAccount.getCurrentBalance(), amount);
-            throw new BadRequestException("Insufficient balance in account " + bankAccount.getAccountId());
-        }
+        validateIfSufficientBalance(bankAccount, amount);
+
         bankAccount.setCurrentBalance(bankAccount.getCurrentBalance().subtract(amount));
         bankAccountRepository.save(bankAccount);
         log.info("Successfully debited {} from bank account ID: {}. New balance: {}", amount, id, bankAccount.getCurrentBalance());
@@ -86,5 +85,35 @@ public class BankAccountServiceImpl implements BankAccountService {
         bankAccount.setCurrentBalance(bankAccount.getCurrentBalance().add(amount));
         bankAccountRepository.save(bankAccount);
         log.info("Successfully credited {} to bank account ID: {}. New balance: {}", amount, id, bankAccount.getCurrentBalance());
+    }
+
+    @Override
+    public void transactionBetweenAccounts(TransactionBetweenAccountsDto dto) {
+        log.info("Initiating transaction: {} from account ID: {} to account ID: {}", dto.getAmount(), dto.getOriginAccountId(), dto.getDestinationAccountId());
+
+        BankAccount originBankAccount = bankAccountRepository.findById(dto.getOriginAccountId())
+                .orElseThrow(() -> new NotFoundException("Origin bank account not found"));
+        BankAccount destinationBankAccount = bankAccountRepository.findById(dto.getDestinationAccountId())
+                .orElseThrow(() -> new NotFoundException("Destination bank account not found"));
+
+        BigDecimal amount = dto.getAmount();
+        validateIfSufficientBalance(originBankAccount, amount);
+
+        originBankAccount.setCurrentBalance(originBankAccount.getCurrentBalance().subtract(amount));
+        destinationBankAccount.setCurrentBalance(destinationBankAccount.getCurrentBalance().add(amount));
+
+        bankAccountRepository.save(originBankAccount);
+        bankAccountRepository.save(destinationBankAccount);
+
+        log.info("Successfully completed transaction: {} from account ID: {} to account ID: {}. New balances - Origin: {}, Destination: {}",
+                amount, dto.getOriginAccountId(), dto.getDestinationAccountId(), originBankAccount.getCurrentBalance(), destinationBankAccount.getCurrentBalance());
+    }
+
+    private void validateIfSufficientBalance(BankAccount account, BigDecimal amount) {
+        if (account.getCurrentBalance().compareTo(amount) < 0) {
+            log.error("Insufficient balance in account ID: {}. Current balance: {}, Debit amount: {}",
+                    account.getAccountId(), account.getCurrentBalance(), amount);
+            throw new BadRequestException("Insufficient balance in account " + account.getAccountId());
+        }
     }
 }

@@ -3,6 +3,7 @@ package com.xmerca.bankaccountsservice.controllers;
 import com.xmerca.bankaccountsservice.config.exceptions.NotFoundException;
 import com.xmerca.bankaccountsservice.dtos.BankAccountDto;
 import com.xmerca.bankaccountsservice.dtos.CreateBankAccountDTO;
+import com.xmerca.bankaccountsservice.dtos.TransactionBetweenAccountsDto;
 import com.xmerca.bankaccountsservice.dtos.TransactionDto;
 import com.xmerca.bankaccountsservice.mappers.BankAccountMapper;
 import com.xmerca.bankaccountsservice.models.BankAccount;
@@ -57,4 +58,12 @@ public class BankAccountsController {
         bankAccountService.creditToBankAccount(id, dto);
         return ResponseEntity.ok("New credit registered successfully");
     }
+
+    @PatchMapping("/transaction")
+    public ResponseEntity<String> transactionBetweenAccount(
+            @Valid @RequestBody TransactionBetweenAccountsDto dto) {
+        bankAccountService.transactionBetweenAccounts(dto);
+        return ResponseEntity.ok("Transaction registered successfully");
+    }
 }
+
