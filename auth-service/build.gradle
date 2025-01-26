@@ -38,6 +38,9 @@ dependencies {
     runtimeOnly 'com.microsoft.sqlserver:mssql-jdbc'
     annotationProcessor 'org.projectlombok:lombok'
 
+    // Swagger
+    implementation 'io.springfox:springfox-boot-starter:3.0.0'
+
     // JWT Security
     implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
     implementation 'io.jsonwebtoken:jjwt-impl:0.11.5'
