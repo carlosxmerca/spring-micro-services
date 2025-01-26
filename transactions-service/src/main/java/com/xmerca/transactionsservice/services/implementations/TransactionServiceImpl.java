@@ -46,11 +46,11 @@ public class TransactionServiceImpl implements TransactionService {
 
 
     @Override
-    public Transaction depositToAccount(CreateDepositDto dto) {
+    public Transaction depositToAccount(CreateDepositDto dto, String token) {
         TransactionType type = transactionTypeRepository.findById(TransactionTypeEnum.DEPOSIT.getId())
                 .orElseThrow(() -> new RuntimeException("Transaction type not found"));
 
-        getBankAccount(dto.getAccountId());
+        getBankAccount(dto.getAccountId(), token);
 
         Transaction transaction = new Transaction();
         transaction.setTransactionType(type);
@@ -58,17 +58,17 @@ public class TransactionServiceImpl implements TransactionService {
         transaction.setAmount(dto.getAmount());
         transaction = transactionRepository.save(transaction);
 
-        updateAccountBalanceWithCredit(dto.getAccountId(), dto.getAmount());
+        updateAccountBalanceWithCredit(dto.getAccountId(), dto.getAmount(), token);
 
         return transaction;
     }
 
     @Override
-    public Transaction withdrawFromAccount(CreateWithdrawDto dto) {
+    public Transaction withdrawFromAccount(CreateWithdrawDto dto, String token) {
         TransactionType type = transactionTypeRepository.findById(TransactionTypeEnum.WITHDRAW.getId())
                 .orElseThrow(() -> new RuntimeException("Transaction type not found"));
 
-        BankAccountDto accountDto = getBankAccount(dto.getAccountId());
+        BankAccountDto accountDto = getBankAccount(dto.getAccountId(), token);
         validateIfSufficientBalance(accountDto, dto.getAmount());
 
         Transaction transaction = new Transaction();
@@ -77,19 +77,19 @@ public class TransactionServiceImpl implements TransactionService {
         transaction.setAmount(dto.getAmount());
         transaction = transactionRepository.save(transaction);
 
-        updateAccountBalanceWithDebit(dto.getAccountId(), dto.getAmount());
+        updateAccountBalanceWithDebit(dto.getAccountId(), dto.getAmount(), token);
 
         return transaction;
     }
 
     @Override
-    public Transaction transactionBetweenAccounts(CreateTransactionDto dto) {
+    public Transaction transactionBetweenAccounts(CreateTransactionDto dto, String token) {
         TransactionType type = transactionTypeRepository.findById(TransactionTypeEnum.TRANSACTION.getId())
                 .orElseThrow(() -> new RuntimeException("Transaction type not found"));
 
-        BankAccountDto originAccount = getBankAccount(dto.getOriginAccountId());
+        BankAccountDto originAccount = getBankAccount(dto.getOriginAccountId(), token);
         validateIfSufficientBalance(originAccount, dto.getAmount());
-        getBankAccount(dto.getDestinationAccountId());
+        getBankAccount(dto.getDestinationAccountId(), token);
 
         Transaction transaction = new Transaction();
         transaction.setTransactionType(type);
@@ -98,7 +98,7 @@ public class TransactionServiceImpl implements TransactionService {
         transaction.setAmount(dto.getAmount());
         transaction = transactionRepository.save(transaction);
 
-        createTransactionBetweenAccounts(dto);
+        createTransactionBetweenAccounts(dto, token);
 
         return transaction;
     }
@@ -111,13 +111,14 @@ public class TransactionServiceImpl implements TransactionService {
         }
     }
 
-    private BankAccountDto getBankAccount(UUID accountId) {
+    private BankAccountDto getBankAccount(UUID accountId, String token) {
         BankAccountDto accountDto = webClientBuilder.build().get()
                 .uri("http://bank-accounts-service/bank-accounts/" + accountId)
+                .header("Authorization", "Bearer " + token)
                 .retrieve()
                 .onStatus(HttpStatus::is4xxClientError, response -> {
                     log.error("Client error while fetching account: {}", response.statusCode());
-                    throw new BadRequestException("Account with ID: " + accountId +" was not found");
+                    throw new BadRequestException("Account with ID: " + accountId + " was not found");
                 })
                 .onStatus(HttpStatus::is5xxServerError, response -> {
                     log.error("Server error while fetching account: {}", response.statusCode());
@@ -128,13 +129,13 @@ public class TransactionServiceImpl implements TransactionService {
 
         if (accountDto == null) {
             log.error("Account not found: {}", accountId);
-            throw new BadRequestException("Account with ID: " + accountId +" was not found");
+            throw new BadRequestException("Account with ID: " + accountId + " was not found");
         }
 
         return accountDto;
     }
 
-    private void updateAccountBalance(UUID accountId, BigDecimal amount, AccountOperationEnum operation) {
+    private void updateAccountBalance(UUID accountId, BigDecimal amount, AccountOperationEnum operation, String token) {
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("amount", amount);
 
@@ -142,11 +143,12 @@ public class TransactionServiceImpl implements TransactionService {
 
         webClientBuilder.build().patch()
                 .uri(uri)
+                .header("Authorization", "Bearer " + token)
                 .bodyValue(requestBody)
                 .retrieve()
                 .onStatus(HttpStatus::is4xxClientError, response -> {
                     log.error("Client error while updating account balance: {}", response.statusCode());
-                    throw new BadRequestException("Account with ID: " + accountId +" was not found");
+                    throw new BadRequestException("Account with ID: " + accountId + " was not found");
                 })
                 .onStatus(HttpStatus::is5xxServerError, response -> {
                     log.error("Server error while updating account balance: {}", response.statusCode());
@@ -156,15 +158,15 @@ public class TransactionServiceImpl implements TransactionService {
                 .block();
     }
 
-    private void updateAccountBalanceWithCredit(UUID accountId, BigDecimal amount) {
-        updateAccountBalance(accountId, amount, AccountOperationEnum.CREDIT);
+    private void updateAccountBalanceWithCredit(UUID accountId, BigDecimal amount, String token) {
+        updateAccountBalance(accountId, amount, AccountOperationEnum.CREDIT, token);
     }
 
-    private void updateAccountBalanceWithDebit(UUID accountId, BigDecimal amount) {
-        updateAccountBalance(accountId, amount, AccountOperationEnum.DEBIT);
+    private void updateAccountBalanceWithDebit(UUID accountId, BigDecimal amount, String token) {
+        updateAccountBalance(accountId, amount, AccountOperationEnum.DEBIT, token);
     }
 
-    private void createTransactionBetweenAccounts(CreateTransactionDto dto) {
+    private void createTransactionBetweenAccounts(CreateTransactionDto dto, String token) {
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("amount", dto.getAmount());
         requestBody.put("originAccountId", dto.getOriginAccountId());
@@ -174,6 +176,7 @@ public class TransactionServiceImpl implements TransactionService {
 
         webClientBuilder.build().patch()
                 .uri(uri)
+                .header("Authorization", "Bearer " + token)
                 .bodyValue(requestBody)
                 .retrieve()
                 .onStatus(HttpStatus::is4xxClientError, response -> {

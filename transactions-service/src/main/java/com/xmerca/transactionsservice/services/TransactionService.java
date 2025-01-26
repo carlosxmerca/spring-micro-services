@@ -11,9 +11,9 @@ import java.util.UUID;
 public interface TransactionService {
     List<Transaction> getTransactionsByAccountId(UUID accountId);
 
-    Transaction depositToAccount(CreateDepositDto dto);
+    Transaction depositToAccount(CreateDepositDto dto, String token);
 
-    Transaction withdrawFromAccount(CreateWithdrawDto dto);
+    Transaction withdrawFromAccount(CreateWithdrawDto dto, String token);
 
-    Transaction transactionBetweenAccounts(CreateTransactionDto dto);
+    Transaction transactionBetweenAccounts(CreateTransactionDto dto, String token);
 }

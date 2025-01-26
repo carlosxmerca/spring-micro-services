@@ -9,6 +9,7 @@ import com.xmerca.bankaccountsservice.mappers.BankAccountMapper;
 import com.xmerca.bankaccountsservice.models.BankAccount;
 import com.xmerca.bankaccountsservice.services.BankAccountService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -25,6 +26,7 @@ public class BankAccountsController {
     }
 
     @GetMapping("/{id}")
+    @Secured({"ROLE_ADMIN", "ROLE_USER"})
     public ResponseEntity<BankAccountDto> bankAccounts(@PathVariable UUID id) {
         BankAccount bankAccount = bankAccountService.getBankAccount(id)
                 .orElseThrow(() -> new NotFoundException("Bank account not found"));
@@ -32,18 +34,21 @@ public class BankAccountsController {
     }
 
     @GetMapping("/client/{clientId}")
+    @Secured({"ROLE_ADMIN", "ROLE_USER"})
     public ResponseEntity<List<BankAccountDto>> getBankAccountsByClient(@PathVariable UUID clientId) {
         List<BankAccount> bankAccounts = bankAccountService.getBankAccountsByClientId(clientId);
         return ResponseEntity.ok(BankAccountMapper.toBankAccountDto(bankAccounts));
     }
 
     @PostMapping
+    @Secured({"ROLE_ADMIN"})
     public ResponseEntity<BankAccountDto> createBankAccount(@Valid @RequestBody CreateBankAccountDTO dto) {
         BankAccount bankAccount = bankAccountService.createBankAccount(dto);
         return ResponseEntity.ok(BankAccountMapper.toBankAccountDto(bankAccount));
     }
 
     @PatchMapping("/debit/{id}")
+    @Secured({"ROLE_ADMIN", "ROLE_USER"})
     public ResponseEntity<String> debitToAccount(
             @PathVariable UUID id,
             @Valid @RequestBody TransactionDto dto) {
@@ -52,6 +57,7 @@ public class BankAccountsController {
     }
 
     @PatchMapping("/credit/{id}")
+    @Secured({"ROLE_ADMIN", "ROLE_USER"})
     public ResponseEntity<String> creditToAccount(
             @PathVariable UUID id,
             @Valid @RequestBody TransactionDto dto) {
@@ -60,10 +66,10 @@ public class BankAccountsController {
     }
 
     @PatchMapping("/transaction")
+    @Secured({"ROLE_ADMIN", "ROLE_USER"})
     public ResponseEntity<String> transactionBetweenAccount(
             @Valid @RequestBody TransactionBetweenAccountsDto dto) {
         bankAccountService.transactionBetweenAccounts(dto);
         return ResponseEntity.ok("Transaction registered successfully");
     }
 }
-

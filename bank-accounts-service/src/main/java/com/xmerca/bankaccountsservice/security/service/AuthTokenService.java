@@ -1,12 +1,10 @@
-package com.xmerca.transactionsservice.security.service;
+package com.xmerca.bankaccountsservice.security.service;
 
-import com.xmerca.transactionsservice.config.exceptions.UnauthorizedException;
-import com.xmerca.transactionsservice.security.payload.AuthTokenPayload;
+import com.xmerca.bankaccountsservice.config.exceptions.UnauthorizedException;
+import com.xmerca.bankaccountsservice.security.payload.AuthTokenPayload;
 import io.jsonwebtoken.Claims;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
-import javax.servlet.http.HttpServletRequest;
 
 @Slf4j
 @Service
@@ -40,13 +38,5 @@ public class AuthTokenService {
 
     public boolean isTokenValid(String token, String userId) {
         return (jwtService.extractSubject(token).equals(userId)) && !jwtService.isTokenExpired(token);
-    }
-
-    public String getRequestToken(HttpServletRequest request) {
-        String authHeader = request.getHeader("Authorization");
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            return authHeader.substring(7);
-        }
-        return null;
     }
 }

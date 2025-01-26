@@ -2,11 +2,13 @@ package com.xmerca.bankaccountsservice.config;
 
 import com.xmerca.bankaccountsservice.config.exceptions.BadRequestException;
 import com.xmerca.bankaccountsservice.config.exceptions.NotFoundException;
+import com.xmerca.bankaccountsservice.config.exceptions.UnauthorizedException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -92,6 +94,22 @@ public class GlobalExceptionHandler {
                 parameterName, request.getRequestURI(), requiredType, providedValue);
 
         return ResponseEntity.badRequest().body(response);
+    }
+
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<String> handleUnauthorizedException(UnauthorizedException ex) {
+        log.error("Invalid token: {}", ex.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body("Unauthorized: " + ex.getMessage());
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<String> handleAccessDeniedException(AccessDeniedException ex) {
+        log.error("Access denied: {}", ex.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body("Access denied: " + ex.getMessage());
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
