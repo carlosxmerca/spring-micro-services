@@ -32,3 +32,6 @@ auth service - http://localhost:8084/swagger-ui/
 
 ### Grafana Loki
 Grafana Loki - http://localhost:3000
+
+### Author
+Carlos Mercado
