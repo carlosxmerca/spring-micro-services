@@ -22,14 +22,6 @@ public class BankAccountIntegrationTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @Autowired
-    private BankAccountRepository bankAccountRepository;
-
-    @BeforeEach
-    void setUp() {
-        bankAccountRepository.deleteAll();
-    }
-
     @Test
     @WithMockUser(authorities = {"ROLE_ADMIN"})
     void shouldCreateAndGetBankAccount() throws Exception {

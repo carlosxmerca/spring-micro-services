@@ -4,7 +4,6 @@ import com.xmerca.transactionsservice.models.Transaction;
 import com.xmerca.transactionsservice.models.TransactionType;
 import com.xmerca.transactionsservice.repository.TransactionRepository;
 import com.xmerca.transactionsservice.repository.TransactionTypeRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -30,11 +29,6 @@ public class TransactionIntegrationTest {
 
     @Autowired
     private TransactionTypeRepository transactionTypeRepository;
-
-    @BeforeEach
-    public void setUp() {
-        transactionRepository.deleteAll();
-    }
 
     @Test
     @Transactional

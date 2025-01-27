@@ -42,6 +42,7 @@ public class SecurityConfiguration {
                         .antMatchers("/v2/api-docs").permitAll()
                         .antMatchers( "/webjars/**").permitAll()
                         .antMatchers("/swagger-ui/**").permitAll()
+                        .antMatchers("/actuator/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
