@@ -20,3 +20,15 @@ You can explore more details about the project in the [Web Documentation](https:
 - **Gradle** (for building and running Spring Boot applications)
 - **Docker** (for containerization, if needed)
 - **Insomnia** or **Swagger** (for API testing)
+
+### API Gateway
+API Gateway - http://localhost:8080
+Eureka Server - http://localhost:8080/eureka/web
+
+### Swagger documentation
+bank account service - http://localhost:8083/swagger-ui/
+transaction service - http://localhost:8082/swagger-ui/
+auth service - http://localhost:8084/swagger-ui/
+
+### Grafana Loki
+Grafana Loki - http://localhost:3000
